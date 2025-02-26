@@ -25,7 +25,12 @@ EVENT_TYPES = {
     # "WatchEvent"
 }
 
+
 class InvalidUserError(Exception):
+    pass
+
+
+class RateLimitExceededError(Exception):
     pass
 
 
@@ -35,7 +40,10 @@ def main(username, limit=5):
         with urllib.request.urlopen(url) as f:
             events = json.load(f)
     except urllib.error.HTTPError as e:
-        raise InvalidUserError(f"User not found: {username}")
+        if e.code == 403 or e.code == 429:
+            raise RateLimitExceededError("Request rate limit exceeded") from e
+        if e.code == 404:
+            raise InvalidUserError(f"User not found: {username}") from e
 
     # Events in descending order of created_at
     for i, event in enumerate(events):
