@@ -34,6 +34,10 @@ class RateLimitExceededError(Exception):
     pass
 
 
+class NetworkError(Exception):
+    pass
+
+
 def main(username, limit=5):
     try:
         url = f"https://api.github.com/users/{username}/events"
@@ -41,9 +45,11 @@ def main(username, limit=5):
             events = json.load(f)
     except urllib.error.HTTPError as e:
         if e.code == 403 or e.code == 429:
-            raise RateLimitExceededError("Request rate limit exceeded") from e
+            raise RateLimitExceededError("Request rate limit exceeded in request to GitHub API") from e
         if e.code == 404:
             raise InvalidUserError(f"User not found: {username}") from e
+        if e.code == 503:
+            raise NetworkError("Network issue in request to GitHub API")
 
     # Events in descending order of created_at
     for i, event in enumerate(events):
