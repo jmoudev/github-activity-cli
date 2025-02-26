@@ -31,22 +31,19 @@ def main(username, limit=5):
     with urllib.request.urlopen(url) as f:
         events = json.load(f)
 
-    event_messages = []
     # Events in descending order of created_at
     for i, event in enumerate(events):
         if i >= limit:
             break
 
         event_type = event["type"]
-
         try:
             event_message_callable = EVENT_TYPES[event_type]
         except KeyError as e:
             raise ValueError(f"{event_type} not in allowed event types.") from e
         
-        event_messages.append(event_message_callable(event))
-    
-    print(event_messages)
+        print(f"- {event_message_callable(event)}")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="github-activity", description="Query GitHub activity from the command line")
