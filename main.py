@@ -26,13 +26,17 @@ EVENT_TYPES = {
 }
 
 
-def main(username):
+def main(username, limit=5):
     url = f"https://api.github.com/users/{username}/events"
     with urllib.request.urlopen(url) as f:
         events = json.load(f)
 
     event_messages = []
-    for event in events:
+    # Events in descending order of created_at
+    for i, event in enumerate(events):
+        if i >= limit:
+            break
+
         event_type = event["type"]
 
         try:
