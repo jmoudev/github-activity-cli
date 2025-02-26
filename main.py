@@ -25,11 +25,17 @@ EVENT_TYPES = {
     # "WatchEvent"
 }
 
+class InvalidUserError(Exception):
+    pass
+
 
 def main(username, limit=5):
-    url = f"https://api.github.com/users/{username}/events"
-    with urllib.request.urlopen(url) as f:
-        events = json.load(f)
+    try:
+        url = f"https://api.github.com/users/{username}/events"
+        with urllib.request.urlopen(url) as f:
+            events = json.load(f)
+    except urllib.error.HTTPError as e:
+        raise InvalidUserError(f"User not found: {username}")
 
     # Events in descending order of created_at
     for i, event in enumerate(events):
